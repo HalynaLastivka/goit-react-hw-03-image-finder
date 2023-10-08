@@ -13,7 +13,7 @@ export class App extends Component {
     isLoading: false,
     error: null,
     searchedPostId: null,
-    page: 1,
+    page: 0,
     modal: {
       isOpen: false,
       data: null,
@@ -34,6 +34,7 @@ export class App extends Component {
     const searchedPostId = event.currentTarget.elements.searchPostId.value;
     this.setState({
       searchedPostId: searchedPostId,
+      page: 0,
     });
 
     event.currentTarget.reset();
