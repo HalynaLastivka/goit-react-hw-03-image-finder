@@ -32,12 +32,17 @@ export class App extends Component {
     event.preventDefault();
 
     const searchedPostId = event.currentTarget.elements.searchPostId.value;
-    this.setState({
-      searchedPostId: searchedPostId,
-      page: 0,
-    });
+    if (searchedPostId.trim() !== '') {
+      this.setState({
+        searchedPostId: searchedPostId,
+        page: 0,
+        photos: null,
+      });
 
-    event.currentTarget.reset();
+      event.currentTarget.reset();
+    } else {
+      alert('Поле search не може бути порожнім');
+    }
   };
 
   fetchFinder = async () => {
@@ -45,15 +50,17 @@ export class App extends Component {
       this.setState({ isLoading: true });
       const { searchedPostId, page } = this.state;
       const photos = await fetchFinder(searchedPostId, page + 1);
-      this.setState(prevState => ({
-        photos: [
-          ...(prevState.photos && prevState.photos.length > 0
-            ? prevState.photos
-            : []),
-          ...photos.hits,
-        ],
-        page: prevState.page + 1,
-      }));
+      if (photos.hits) {
+        this.setState(prevState => ({
+          photos: [
+            ...(prevState.photos && prevState.photos.length > 0
+              ? prevState.photos
+              : []),
+            ...photos.hits,
+          ],
+          page: prevState.page + 1,
+        }));
+      }
     } catch (error) {
       this.setState({ error: error.message });
     } finally {
@@ -80,8 +87,10 @@ export class App extends Component {
   };
 
   render() {
+    const { photos, searchedPostId } = this.state;
     const showPosts =
-      Array.isArray(this.state.photos) && this.state.photos.length;
+      Array.isArray(this.state.photos) && this.state.photos.length > 0;
+    console.log(showPosts);
     return (
       <div className={css.App}>
         <Searchbar
@@ -90,11 +99,10 @@ export class App extends Component {
         />
         {this.state.isLoading && <Loader />}
         {this.state.error && <p className="error">{this.state.error}</p>}
-        {showPosts && (
-          <ImageGalleryItem
-            photos={this.state.photos}
-            onOpenModal={this.onOpenModal}
-          />
+        {showPosts ? (
+          <ImageGalleryItem photos={photos} onOpenModal={this.onOpenModal} />
+        ) : (
+          searchedPostId && !this.state.isLoading && <p>Not found :(</p>
         )}
         {showPosts && <Button onClick={this.fetchFinder} />}
 

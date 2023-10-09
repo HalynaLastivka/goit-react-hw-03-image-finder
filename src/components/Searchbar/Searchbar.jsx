@@ -10,7 +10,6 @@ export default class Searchbar extends Component {
             GO
             {/* <span className={css.SearchFormbuttonlabel}>Search</span> */}
           </button>
-
           <input
             className={css.SearchForminput}
             type="text"
