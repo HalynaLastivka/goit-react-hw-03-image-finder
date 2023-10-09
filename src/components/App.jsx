@@ -14,6 +14,7 @@ export class App extends Component {
     error: null,
     searchedPostId: null,
     page: 0,
+    totalHits: 0,
     modal: {
       isOpen: false,
       data: null,
@@ -37,6 +38,7 @@ export class App extends Component {
         searchedPostId: searchedPostId,
         page: 0,
         photos: null,
+        totalHits: 0,
       });
 
       event.currentTarget.reset();
@@ -50,6 +52,7 @@ export class App extends Component {
       this.setState({ isLoading: true });
       const { searchedPostId, page } = this.state;
       const photos = await fetchFinder(searchedPostId, page + 1);
+      console.dir(photos);
       if (photos.hits) {
         this.setState(prevState => ({
           photos: [
@@ -59,6 +62,7 @@ export class App extends Component {
             ...photos.hits,
           ],
           page: prevState.page + 1,
+          totalHits: photos.total,
         }));
       }
     } catch (error) {
@@ -87,9 +91,11 @@ export class App extends Component {
   };
 
   render() {
-    const { photos, searchedPostId } = this.state;
+    const { photos, searchedPostId, page, totalHits } = this.state;
     const showPosts =
       Array.isArray(this.state.photos) && this.state.photos.length > 0;
+    console.log();
+    const showLoad = page * 12 < totalHits ? true : false;
     console.log(showPosts);
     return (
       <div className={css.App}>
@@ -104,7 +110,7 @@ export class App extends Component {
         ) : (
           searchedPostId && !this.state.isLoading && <p>Not found :(</p>
         )}
-        {showPosts && <Button onClick={this.fetchFinder} />}
+        {showPosts && showLoad && <Button onClick={this.fetchFinder} />}
 
         {this.state.modal.isOpen && (
           <Modal
